@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-(2)l!wjsfh+r#)58$n1)ouw1-n_3ak+(-fdcg#tg_*p4__iu5z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost','igenerate.readils.com']
 
 
 # Application definition
