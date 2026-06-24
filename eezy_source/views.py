@@ -1,0 +1,446 @@
+from time import timezone
+
+from django.shortcuts import render
+
+import logging
+
+from eezy_source.models import Currency, ProcessConfig, SystemUnits, FX, Receipt, Record
+logger = logging.getLogger("django")
+
+from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, SystemUnitResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer 
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework import status
+
+class Resp:
+	def __init__(self, StatusDesc, Result, StatusCode):
+		self.StatusDesc=StatusDesc
+		self.Result=Result
+		self.StatusCode=StatusCode
+
+# Create your views here.
+class ConfigurationViewSet(viewsets.ViewSet):
+    def list(self, request):
+        # Logic to list configurations
+        message = "Configurations retrieved successfully"
+        status_ = status.HTTP_200_OK
+        try:
+            configurations = ProcessConfig.objects.filter(active=True)
+            logger.info("Retrieved configurations: %s", configurations)
+            serializer = ConfigurationSerializerGet(configurations, many=True).data
+            logger.info("Serialized configurations: %s", serializer)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            return Response(ConfigurationsResponseSerializer(resp).data, status.HTTP_200_OK)
+        except Exception as e:
+            logger.error("Error retrieving configurations: %s", str(e))
+            return Response({"error": "Error retrieving configurations"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def create(self, request):
+        # Logic to create a new language
+        message = "Configuration created successfully"
+        status_ = status.HTTP_201_CREATED
+        serializer = ConfigurationSerializer(data=request.data)
+        if serializer.is_valid():
+            process_code = serializer.validated_data.get('processCode')
+            seller_shipper_delivery_fee = serializer.validated_data.get('sellerShipperDeliveryFee')
+            seller_shipper_delivery_fee_unit = serializer.validated_data.get('sellerShipperDeliveryFeeUnit')
+            handlingFee = serializer.validated_data.get('handlingFee')
+            handlingFeeUnit = serializer.validated_data.get('handlingFeeUnit')
+            weightUnit = serializer.validated_data.get('weightUnit')
+            shippingMode = serializer.validated_data.get('shippingMode')
+            customRate = serializer.validated_data.get('customRate')
+            customRateUnit = serializer.validated_data.get('customRateUnit')
+            shippingMargin = serializer.validated_data.get('shippingMargin')
+            shippingMarginUnit = serializer.validated_data.get('shippingMarginUnit')
+            defaultCurrency = serializer.validated_data.get('defaultCurrency')
+            try:
+                configuration = ProcessConfig.objects.create(
+                    processCode=process_code,
+                    sellerShipperDeliveryFee=seller_shipper_delivery_fee,
+                    sellerShipperDeliveryFeeUnit=seller_shipper_delivery_fee_unit,
+                    handlingFee=handlingFee,
+                    handlingFeeUnit=handlingFeeUnit,
+                    weightUnit=weightUnit,
+                    shippingMode=shippingMode,
+                    customRate=customRate,
+                    customRateUnit=customRateUnit,
+                    shippingMargin=shippingMargin,
+                    shippingMarginUnit=shippingMarginUnit,
+                    defaultCurrency=defaultCurrency
+                )
+                configuration.save()
+                message = "Configuration created successfully"
+                status_ = status.HTTP_201_CREATED
+                resp = Resp(StatusDesc=message, StatusCode=status_, Result=ConfigurationSerializerGet(configuration).data)
+                return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logger.error("Error creating configuration: %s", str(e))
+                message = "Configuration creation failed"
+                status_ = status.HTTP_400_BAD_REQUEST
+                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error("Configuration creation failed: %s", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self, request, pk=None):
+        message = "Configuration created successfully"
+        status_ = status.HTTP_201_CREATED
+        serializer = ConfigurationSerializer(data=request.data)
+        if serializer.is_valid():
+            process_code = serializer.validated_data.get('processCode')
+            seller_shipper_delivery_fee = serializer.validated_data.get('sellerShipperDeliveryFee')
+            seller_shipper_delivery_fee_unit = serializer.validated_data.get('sellerShipperDeliveryFeeUnit')
+            handlingFee = serializer.validated_data.get('handlingFee')
+            handlingFeeUnit = serializer.validated_data.get('handlingFeeUnit')
+            weightUnit = serializer.validated_data.get('weightUnit')
+            shippingMode = serializer.validated_data.get('shippingMode')
+            customRate = serializer.validated_data.get('customRate')
+            customRateUnit = serializer.validated_data.get('customRateUnit')
+            shippingMargin = serializer.validated_data.get('shippingMargin')
+            shippingMarginUnit = serializer.validated_data.get('shippingMarginUnit')
+            defaultCurrency = serializer.validated_data.get('defaultCurrency')
+            try:
+                configuration = ProcessConfig.objects.filter(processCode=process_code).first()
+                if configuration:
+                    configuration.sellerShipperDeliveryFee = seller_shipper_delivery_fee
+                    configuration.sellerShipperDeliveryFeeUnit = seller_shipper_delivery_fee_unit
+                    configuration.handlingFee = handlingFee
+                    configuration.handlingFeeUnit = handlingFeeUnit
+                    configuration.weightUnit = weightUnit
+                    configuration.shippingMode = shippingMode
+                    configuration.customRate = customRate
+                    configuration.customRateUnit = customRateUnit
+                    configuration.shippingMargin = shippingMargin
+                    configuration.shippingMarginUnit = shippingMarginUnit
+                    configuration.defaultCurrency = defaultCurrency
+                    configuration.save()
+
+                    message = "Configuration created successfully"
+                    status_ = status.HTTP_201_CREATED
+                    resp = Resp(StatusDesc=message, StatusCode=status_, Result=ConfigurationSerializerGet(configuration).data)
+                    return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
+                else:
+                    message = "Configuration not found"
+                    status_ = status.HTTP_404_NOT_FOUND
+                    resp = Resp(StatusDesc=message, StatusCode=status_, Result=None)
+                    return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                logger.error("Error creating configuration: %s", str(e))
+                message = "Configuration creation failed"
+                status_ = status.HTTP_400_BAD_REQUEST
+                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error("Configuration creation failed: %s", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def retrieve(self, request, pk=None):
+        try:
+            message = "Configuration retrieved successfully"
+            status_ = status.HTTP_200_OK
+            configuration = ProcessConfig.objects.get(pk=pk)
+            serializer = ConfigurationSerializerGet(configuration)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            return Response(ConfigurationResponseSerializer(resp).data, status.HTTP_200_OK)
+        except ProcessConfig.DoesNotExist:
+            return Response({"error": "Configuration not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def destroy(self, request, pk=None):
+        try:
+            configuration = ProcessConfig.objects.get(pk=pk)
+            configuration.delete()
+            return Response({"message": "Configuration deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except ProcessConfig.DoesNotExist:
+            return Response({"error": "Configuration not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+class SystemUnitsViewSet(viewsets.ViewSet):
+    def list(self, request):
+        # Logic to list system units
+        message = "System units retrieved successfully"
+        status_ = status.HTTP_200_OK
+        try:
+            system_units = SystemUnits.objects.all()
+            logger.info("Retrieved system units: %s", system_units)
+            serializer = SystemUnitsSerializerGet(system_units, many=True).data
+            logger.info("Serialized system units: %s", serializer)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            return Response(SystemUnitsResponseSerializer(resp).data, status.HTTP_200_OK)
+        except Exception as e:
+            logger.error("Error retrieving system units: %s", str(e))
+            return Response({"error": "Error retrieving system units"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def create(self, request):
+        # Logic to create a new system unit
+        message = "System unit created successfully"
+        status_ = status.HTTP_201_CREATED
+        serializer = SystemUnitsSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                name = serializer.validated_data.get('unitName')
+                code = serializer.validated_data.get('unitCode')
+                symbol = serializer.validated_data.get('unitSymbol')
+                description = serializer.validated_data.get('unitDescription')
+                unit_type = serializer.validated_data.get('unitType')
+                system_unit = SystemUnits.objects.create(
+                    unitName=name,
+                    unitCode=code,
+                    unitSymbol=symbol,
+                    unitDescription=description,
+                    unitType=unit_type
+                )
+                system_unit.save()
+                message = "System unit created successfully"
+                status_ = status.HTTP_201_CREATED
+                resp = Resp(StatusDesc=message, StatusCode=status_, Result=SystemUnitsSerializerGet(system_unit).data)
+                return Response(SystemUnitsResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logger.error("Error creating system unit: %s", str(e))
+                message = "System unit creation failed"
+                status_ = status.HTTP_400_BAD_REQUEST
+                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                return Response(SystemUnitsResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error("System unit creation failed: %s", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def retrieve(self, request, pk=None):
+        try:
+            message = "System unit retrieved successfully"
+            status_ = status.HTTP_200_OK
+            system_unit = SystemUnits.objects.get(pk=pk)
+            serializer = SystemUnitsSerializerGet(system_unit)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            return Response(SystemUnitsResponseSerializer(resp).data, status.HTTP_200_OK)
+        except SystemUnits.DoesNotExist:
+            return Response({"error": "System unit not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def destroy(self, request, pk=None):
+        try:
+            system_unit = SystemUnits.objects.get(pk=pk)
+            system_unit.delete()
+            return Response({"message": "System unit deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except SystemUnits.DoesNotExist:
+            return Response({"error": "System unit not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class CurrencyViewSet(viewsets.ViewSet):
+    def list(self, request):
+        # Logic to list currencies
+        message = "Currencies retrieved successfully"
+        status_ = status.HTTP_200_OK
+        try:
+            currencies = Currency.objects.filter(active=True)
+            logger.info("Retrieved currencies: %s", currencies)
+            serializer = CurrencySerializerList(currencies, many=True).data
+            logger.info("Serialized currencies: %s", serializer)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            return Response(CurrenciesResponseSerializer(resp).data, status.HTTP_200_OK)
+        except Exception as e:
+            logger.error("Error retrieving currencies: %s", str(e))
+            return Response({"error": "Error retrieving currencies"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def create(self, request):
+        # Logic to create a new currency
+        message = "Currency created successfully"
+        status_ = status.HTTP_201_CREATED
+        serializer = CurrencySerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                name = serializer.validated_data.get('currencyName')
+                code = serializer.validated_data.get('currencyCode')
+                symbol = serializer.validated_data.get('currencySymbol')
+                currency = Currency.objects.create(
+                    currencyName=name,
+                    currencyCode=code,
+                    currencySymbol=symbol,
+                    active=True,
+                    created_at=timezone.now(),
+                    modified_at=timezone.now()
+                )
+                currency.save()
+                message = "Currency created successfully"
+                status_ = status.HTTP_201_CREATED
+                resp = Resp(StatusDesc=message, StatusCode=status_, Result=CurrencySerializerList(currency).data)
+                return Response(CurrencyResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logger.error("Error creating currency: %s", str(e))
+                # return Response({"error": "Error creating currency"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                message = "Currency creation failed"
+                status_ = status.HTTP_400_BAD_REQUEST
+                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                return Response(CurrencyResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error("Currency creation failed: %s", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def retrieve(self, request, pk=None):
+        try:
+            message = "Currency retrieved successfully"
+            status_ = status.HTTP_200_OK
+            currency = Currency.objects.get(pk=pk)
+            serializer = CurrencySerializerList(currency)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
+            return Response(CurrencyResponseSerializer(resp).data, status.HTTP_200_OK)
+        except Currency.DoesNotExist:
+            return Response({"error": "Currency not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def destroy(self, request, pk=None):
+        try:
+            currency = Currency.objects.get(pk=pk)
+            currency.delete()
+            return Response({"message": "Currency deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Currency.DoesNotExist:
+            return Response({"error": "Currency not found"}, status=status.HTTP_404_NOT_FOUND)
+              
+class FXViewSet(viewsets.ViewSet):
+    def list(self, request):
+        # Logic to list configurations
+        message = "FX retrieved successfully"
+        status_ = status.HTTP_200_OK
+        try:
+            configurations = FX.objects.filter(active=True)
+            logger.info("Retrieved configurations: %s", configurations)
+            serializer = FXSerializerGet(configurations, many=True).data
+            logger.info("Serialized configurations: %s", serializer)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            return Response(FXResponseSerializer(resp).data, status.HTTP_200_OK)
+        except Exception as e:
+            logger.error("Error retrieving FX rates: %s", str(e))
+            return Response({"error": "Error retrieving FX rates"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def create(self, request):
+        # Logic to create a new FX rate
+        message = "FX rate created successfully"
+        status_ = status.HTTP_201_CREATED
+        serializer = FXSerializer(data=request.data)
+        if serializer.is_valid():
+            sendCurrency = serializer.validated_data.get('sendCurrency')
+            receiveCurrency = serializer.validated_data.get('receiveCurrency')
+            exchangeRate = serializer.validated_data.get('exchangeRate')
+            fx_rate = FX.objects.create(
+                sendCurrency=sendCurrency,
+                receiveCurrency=receiveCurrency,
+                exchangeRate=exchangeRate,
+                active=True,
+                created_at=timezone.now(),
+                updated_at=timezone.now()
+            )
+            fx_rate.save()
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=FXSerializerGet(fx_rate).data)
+            return Response(FXResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
+        else:
+            logger.error("FX rate creation failed: %s", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def retrieve(self, request, pk=None):
+        try:
+            message = "FX rate retrieved successfully"
+            status_ = status.HTTP_200_OK
+            fx_rate = FX.objects.get(pk=pk)
+            serializer = FXSerializerGet(fx_rate)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
+            return Response(FXResponseSerializer(resp).data, status.HTTP_200_OK)
+        except FX.DoesNotExist:
+            return Response({"error": "FX rate not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def destroy(self, request, pk=None):
+        try:
+            fx_rate = FX.objects.get(pk=pk)
+            fx_rate.active = False  # Mark the FX rate as inactive instead of deleting it
+            fx_rate.save()
+            return Response({"message": "FX rate deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except FX.DoesNotExist:
+            return Response({"error": "FX rate not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+class ReceiptViewSet(viewsets.ViewSet):
+    def list(self, request):
+        # Logic to list receipts
+        message = "Receipts retrieved successfully"
+        status_ = status.HTTP_200_OK
+        try:
+            receipts = Receipt.objects.filter(active=True)
+            logger.info("Retrieved receipts: %s", receipts)
+            serializer = ReceiptSerializerList(receipts, many=True).data
+            logger.info("Serialized receipts: %s", serializer)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            return Response(ReceiptsResponseSerializer(resp).data, status.HTTP_200_OK)
+        except Exception as e:
+            logger.error("Error retrieving receipts: %s", str(e))
+            return Response({"error": "Error retrieving receipts"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def create(self, request):
+        # Logic to create a new receipt
+        message = "Receipt created successfully"
+        status_ = status.HTTP_201_CREATED
+        serializer = ReceiptSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                receiptName = serializer.validated_data.get('receiptName')
+                receiptCode = serializer.validated_data.get('receiptCode')
+                createdBy = serializer.validated_data.get('createdBy')
+                receipt = Receipt.objects.create(
+                    receiptName=receiptName,
+                    receiptCode=receiptCode,
+                    active=True,
+                    created_at=timezone.now(),
+                    updated_at=timezone.now(),
+                    created_by=createdBy if createdBy else (request.user.username if request.user.is_authenticated else 'Anonymous'),
+                    updated_by=createdBy if createdBy else (request.user.username if request.user.is_authenticated else 'Anonymous')
+                )
+                receipt.save()
+
+                try:
+                    records_data = request.data.get('records', [])
+                    for record_data in records_data:
+                        itemName = record_data.get('itemName')
+                        itemCost = record_data.get('itemCost')
+                        quantity = record_data.get('quantity')
+                        totalCost = itemCost * quantity if itemCost and quantity else None
+                        Record.objects.create(
+                            itemName=itemName,
+                            itemCost=itemCost,
+                            quantity=quantity,
+                            totalCost=totalCost,
+                            receipt=receipt,
+                            created_at=timezone.now(),
+                            active=True
+                        ).save()
+                    
+                    message = "Receipt created successfully"
+                    status_ = status.HTTP_201_CREATED
+                    resp = Resp(StatusDesc=message, StatusCode=status_, Result=ReceiptSerializerList(receipt).data)
+                    return Response(ReceiptResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
+                except Exception as e:
+                    logger.error("Error creating records for receipt: %s", str(e))
+                    message = "Receipt creation failed"
+                    status_ = status.HTTP_400_BAD_REQUEST
+                    resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                    return Response(ReceiptResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                logger.error("Error creating receipt: %s", str(e))
+                message = "Receipt creation failed"
+                status_ = status.HTTP_400_BAD_REQUEST
+                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                return Response(ReceiptResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error("Receipt creation failed: %s", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def retrieve(self, request, pk=None):
+        try:
+            message = "Receipt retrieved successfully"
+            status_ = status.HTTP_200_OK
+            receipt = Receipt.objects.get(pk=pk)
+            serializer = ReceiptSerializerList(receipt)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
+            return Response(ReceiptResponseSerializer(resp).data, status.HTTP_200_OK)
+        except Receipt.DoesNotExist:
+            return Response({"error": "Receipt not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def destroy(self, request, pk=None):
+        try:
+            receipt = Receipt.objects.get(pk=pk)
+            receipt.delete()
+            return Response({"message": "Receipt deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Receipt.DoesNotExist:
+            return Response({"error": "Receipt not found"}, status=status.HTTP_404_NOT_FOUND)

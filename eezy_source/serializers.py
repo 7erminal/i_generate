@@ -1,0 +1,130 @@
+from rest_framework import serializers
+from eezy_source.models import Receipt, ProcessConfig, Record, FX, SystemUnits, Currency
+
+class ConfigurationSerializer(serializers.Serializer):
+    processCode = serializers.CharField(max_length=100)
+    sellerShipperDeliveryFee = serializers.FloatField(required=False)
+    sellerShipperDeliveryFeeUnit = serializers.CharField(max_length=100, required=False)
+    handlingFee = serializers.FloatField(required=False)
+    handlingFeeUnit = serializers.CharField(max_length=100, required=False)
+    weightUnit = serializers.CharField(max_length=100, required=False)
+    shippingMode = serializers.CharField(max_length=100, required=False)
+    customRate = serializers.FloatField(required=False)
+    customRateUnit = serializers.CharField(max_length=100, required=False)
+    shippingMargin = serializers.FloatField(required=False)
+    shippingMarginUnit = serializers.CharField(max_length=100, required=False)
+    defaultCurrency = serializers.CharField(max_length=100, required=False)
+
+class ConfigurationSerializerGet(serializers.ModelSerializer):
+    class Meta:
+        model = ProcessConfig
+        fields = '__all__'
+        # depth = 1
+
+class ConfigurationResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = ConfigurationSerializerGet()
+
+class ConfigurationsResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = ConfigurationSerializerGet(many=True)
+
+class RecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Receipt
+        fields = '__all__'
+
+class ReceiptSerializer(serializers.Serializer):
+    receiptCode = serializers.CharField(max_length=100)
+    receiptName = serializers.CharField(max_length=100, required=False)
+    itemName = serializers.CharField(max_length=40)
+    createdBy = serializers.CharField(max_length=100, required=False)
+    itemCost = serializers.FloatField(required=False)
+    quantity = serializers.IntegerField(required=False)
+    active = serializers.BooleanField(required=False)
+
+class ReceiptSerializerList(serializers.ModelSerializer):
+    # category = CategorySerializerGet()
+    # language = LanguageSerializerGet()
+    records = RecordSerializer(many=True, read_only=True)
+    class Meta:
+        model = Receipt
+        fields = '__all__'
+        depth = 1
+
+class ReceiptResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = ReceiptSerializerList()
+
+class ReceiptsResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = ReceiptSerializerList(many=True)
+
+class SystemUnitsSerializer(serializers.Serializer):
+    unitName = serializers.CharField(max_length=100)
+    unitCode = serializers.CharField(max_length=100)
+    unitSymbol = serializers.CharField(max_length=100)
+    unitDescription = serializers.CharField()
+    unitType = serializers.CharField(max_length=100)
+
+class SystemUnitsSerializerGet(serializers.ModelSerializer):
+    class Meta:
+        model = SystemUnits
+        fields = '__all__'
+        depth = 1
+
+class SystemUnitResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = SystemUnitsSerializerGet()
+
+class SystemUnitsResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = SystemUnitsSerializerGet(many=True)
+
+class FXSerializer(serializers.Serializer):
+    sendCurrency = serializers.CharField(max_length=100)
+    receiveCurrency = serializers.CharField(max_length=100)
+    exchangeRate = serializers.FloatField()
+
+class FXSerializerGet(serializers.ModelSerializer):
+    class Meta:
+        model = FX
+        fields = '__all__'
+        depth = 1
+
+class FXResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = FXSerializerGet()
+
+class FXsResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = FXSerializerGet(many=True)
+
+class CurrencySerializer(serializers.Serializer):
+    currencyCode = serializers.CharField(max_length=100)
+    currencyName = serializers.CharField(max_length=100, required=True)
+    currencySymbol = serializers.CharField(max_length=100, required=True)
+
+class CurrencySerializerList(serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = '__all__'
+        depth = 1
+
+class CurrencyResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = CurrencySerializerList()
+
+class CurrenciesResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = CurrencySerializerList(many=True)
