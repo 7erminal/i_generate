@@ -3,9 +3,9 @@ from eezy_source.models import Receipt, ProcessConfig, Record, FX, SystemUnits, 
 
 class ConfigurationSerializer(serializers.Serializer):
     businessName = serializers.CharField(max_length=100)
-    businessPhone = serializers.CharField(max_length=100, required=False)
-    businessEmail = serializers.CharField(max_length=100, required=False)
-    businessAddress = serializers.CharField(max_length=100, required=False)
+    businessPhone = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    businessEmail = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    businessAddress = serializers.CharField(max_length=100, required=False, allow_blank=True)
     processCode = serializers.CharField(max_length=100)
     sellerShipperDeliveryFee = serializers.FloatField(required=False)
     sellerShipperDeliveryFeeUnit = serializers.CharField(max_length=100, required=False)
