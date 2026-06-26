@@ -1,9 +1,20 @@
 from django.db import models
 
 # Create your models here.
+class Business(models.Model):
+    businessId = models.AutoField(primary_key=True)
+    businessName = models.CharField(max_length=100, null=True, blank=True)
+    businessPhone = models.CharField(max_length=100, null=True, blank=True)
+    businessEmail = models.CharField(max_length=100, null=True, blank=True)
+    businessAddress = models.CharField(max_length=100, null=True, blank=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True)
+
 class ProcessConfig(models.Model):
     processConfigId = models.AutoField(primary_key=True)
     processCode = models.CharField(max_length=100)
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='process_business')
     sellerShipperDeliveryFee = models.FloatField(null=True, blank=True)
     sellerShipperDeliveryFeeUnit = models.CharField(max_length=100, null=True, blank=True)
     handlingFee = models.FloatField(null=True, blank=True)

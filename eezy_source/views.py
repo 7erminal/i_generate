@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 import logging
 
-from eezy_source.models import Currency, ProcessConfig, SystemUnits, FX, Receipt, Record
+from eezy_source.models import Currency, ProcessConfig, SystemUnits, FX, Receipt, Record, Business
 logger = logging.getLogger("django")
 
 from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, SystemUnitResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer 
@@ -72,6 +72,21 @@ class ConfigurationViewSet(viewsets.ViewSet):
                     defaultCurrency=defaultCurrency
                 )
                 configuration.save()
+
+                business_name = serializer.validated_data.get('businessName')
+                business_phone = serializer.validated_data.get('businessPhone')
+                business_email = serializer.validated_data.get('businessEmail')
+                business_address = serializer.validated_data.get('businessAddress')
+
+                business = Business.objects.create(
+                    businessName=business_name,
+                    businessPhone=business_phone,
+                    businessEmail=business_email,
+                    businessAddress=business_address
+                )
+
+                business.save()
+                
                 message = "Configuration created successfully"
                 status_ = status.HTTP_201_CREATED
                 resp = Resp(statusDesc=message, statusCode=status_, result=ConfigurationSerializerGet(configuration).data)
@@ -122,15 +137,78 @@ class ConfigurationViewSet(viewsets.ViewSet):
                     configuration.defaultCurrency = defaultCurrency
                     configuration.save()
 
+                    business_name = serializer.validated_data.get('businessName')
+                    business_phone = serializer.validated_data.get('businessPhone')
+                    business_email = serializer.validated_data.get('businessEmail')
+                    business_address = serializer.validated_data.get('businessAddress')
+
+                    business = Business.objects.filter(businessId=configuration.business.businessId).first()
+
+                    if business:
+                        business.businessName = business_name
+                        business.businessPhone = business_phone
+                        business.businessEmail = business_email
+                        business.businessAddress = business_address
+                        business.save()
+
                     message = "Configuration created successfully"
                     status_ = status.HTTP_201_CREATED
                     resp = Resp(statusDesc=message, statusCode=status_, result=ConfigurationSerializerGet(configuration).data)
                     return Response(ConfigurationResponseSerializer(resp).data, status=status_)
                 else:
-                    message = "Configuration not found"
-                    status_ = status.HTTP_404_NOT_FOUND
-                    resp = Resp(statusDesc=message, statusCode=status_, result=None)
-                    return Response(ConfigurationResponseSerializer(resp).data, status=status_)
+                    process_code = serializer.validated_data.get('processCode')
+                    seller_shipper_delivery_fee = serializer.validated_data.get('sellerShipperDeliveryFee')
+                    seller_shipper_delivery_fee_unit = serializer.validated_data.get('sellerShipperDeliveryFeeUnit')
+                    handlingFee = serializer.validated_data.get('handlingFee')
+                    handlingFeeUnit = serializer.validated_data.get('handlingFeeUnit')
+                    weightUnit = serializer.validated_data.get('weightUnit')
+                    shippingMode = serializer.validated_data.get('shippingMode')
+                    customRate = serializer.validated_data.get('customRate')
+                    customRateUnit = serializer.validated_data.get('customRateUnit')
+                    shippingMargin = serializer.validated_data.get('shippingMargin')
+                    shippingMarginUnit = serializer.validated_data.get('shippingMarginUnit')
+                    defaultCurrency = serializer.validated_data.get('defaultCurrency')
+                    try:
+                        configuration = ProcessConfig.objects.create(
+                            processCode=process_code,
+                            sellerShipperDeliveryFee=seller_shipper_delivery_fee,
+                            sellerShipperDeliveryFeeUnit=seller_shipper_delivery_fee_unit,
+                            handlingFee=handlingFee,
+                            handlingFeeUnit=handlingFeeUnit,
+                            weightUnit=weightUnit,
+                            shippingMode=shippingMode,
+                            customRate=customRate,
+                            customRateUnit=customRateUnit,
+                            shippingMargin=shippingMargin,
+                            shippingMarginUnit=shippingMarginUnit,
+                            defaultCurrency=defaultCurrency
+                        )
+                        configuration.save()
+
+                        business_name = serializer.validated_data.get('businessName')
+                        business_phone = serializer.validated_data.get('businessPhone')
+                        business_email = serializer.validated_data.get('businessEmail')
+                        business_address = serializer.validated_data.get('businessAddress')
+
+                        business = Business.objects.create(
+                            businessName=business_name,
+                            businessPhone=business_phone,
+                            businessEmail=business_email,
+                            businessAddress=business_address
+                        )
+
+                        business.save()
+
+                        message = "Configuration created successfully"
+                        status_ = status.HTTP_201_CREATED
+                        resp = Resp(statusDesc=message, statusCode=status_, result=ConfigurationSerializerGet(configuration).data)
+                        return Response(ConfigurationResponseSerializer(resp).data, status=status_)
+                    except Exception as e:
+                        logger.error("Error creating configuration: %s", str(e))
+                        message = "Configuration creation failed"
+                        status_ = status.HTTP_400_BAD_REQUEST
+                        resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
+                        return Response(ConfigurationResponseSerializer(resp).data, status=status_)
             except Exception as e:
                 logger.error("Error creating configuration: %s", str(e))
                 message = "Configuration creation failed"

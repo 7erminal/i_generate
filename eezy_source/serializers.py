@@ -2,6 +2,10 @@ from rest_framework import serializers
 from eezy_source.models import Receipt, ProcessConfig, Record, FX, SystemUnits, Currency
 
 class ConfigurationSerializer(serializers.Serializer):
+    businessName = serializers.CharField(max_length=100)
+    businessPhone = serializers.CharField(max_length=100, required=False)
+    businessEmail = serializers.CharField(max_length=100, required=False)
+    businessAddress = serializers.CharField(max_length=100, required=False)
     processCode = serializers.CharField(max_length=100)
     sellerShipperDeliveryFee = serializers.FloatField(required=False)
     sellerShipperDeliveryFeeUnit = serializers.CharField(max_length=100, required=False)
@@ -19,7 +23,7 @@ class ConfigurationSerializerGet(serializers.ModelSerializer):
     class Meta:
         model = ProcessConfig
         fields = '__all__'
-        # depth = 1
+        depth = 1
 
 class ConfigurationResponseSerializer(serializers.Serializer):
     statusCode = serializers.IntegerField()
@@ -33,7 +37,7 @@ class ConfigurationsResponseSerializer(serializers.Serializer):
 
 class RecordSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Receipt
+        model = Record
         fields = '__all__'
 
 class ReceiptSerializer(serializers.Serializer):
