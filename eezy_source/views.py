@@ -139,9 +139,21 @@ class ConfigurationViewSet(viewsets.ViewSet):
         try:
             message = "Configuration retrieved successfully"
             status_ = status.HTTP_200_OK
+            code = request.query_params.get('code', None)
+            if code:
+                configuration = ProcessConfig.objects.filter(processCode=code).first()
+                if configuration:
+                    status_ = status.HTTP_200_OK
+                    message = "Configuration retrieved successfully"
+                else:
+                    status_ = status.HTTP_404_NOT_FOUND
+                    message = "Configuration not found"
+            else:
+                status_ = status.HTTP_400_BAD_REQUEST
+                message = "Invalid request"
             configuration = ProcessConfig.objects.get(pk=pk)
             serializer = ConfigurationSerializerGet(configuration)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
             return Response(ConfigurationResponseSerializer(resp).data, status.HTTP_200_OK)
         except ProcessConfig.DoesNotExist:
             return Response({"error": "Configuration not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -210,7 +222,7 @@ class SystemUnitsViewSet(viewsets.ViewSet):
             status_ = status.HTTP_200_OK
             system_unit = SystemUnits.objects.get(pk=pk)
             serializer = SystemUnitsSerializerGet(system_unit)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
             return Response(SystemUnitsResponseSerializer(resp).data, status.HTTP_200_OK)
         except SystemUnits.DoesNotExist:
             return Response({"error": "System unit not found"}, status=status.HTTP_404_NOT_FOUND)
