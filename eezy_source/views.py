@@ -13,10 +13,10 @@ from rest_framework.response import Response
 from rest_framework import status
 
 class Resp:
-	def __init__(self, StatusDesc, Result, StatusCode):
-		self.StatusDesc=StatusDesc
-		self.Result=Result
-		self.StatusCode=StatusCode
+	def __init__(self, statusDesc, result, statusCode):
+		self.statusDesc=statusDesc
+		self.result=result
+		self.statusCode=statusCode
 
 # Create your views here.
 class ConfigurationViewSet(viewsets.ViewSet):
@@ -150,7 +150,7 @@ class ConfigurationViewSet(viewsets.ViewSet):
                     message = "Configuration not found"
             else:
                 status_ = status.HTTP_400_BAD_REQUEST
-                message = "Invalid request"
+                message = "Invalid request"                                                                                                                                                                                                                                                                                                                                                                           
             configuration = ProcessConfig.objects.get(pk=pk)
             serializer = ConfigurationSerializerGet(configuration)
             resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
