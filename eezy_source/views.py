@@ -29,7 +29,7 @@ class ConfigurationViewSet(viewsets.ViewSet):
             logger.info("Retrieved configurations: %s", configurations)
             serializer = ConfigurationSerializerGet(configurations, many=True).data
             logger.info("Serialized configurations: %s", serializer)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer)
             return Response(ConfigurationsResponseSerializer(resp).data, status.HTTP_200_OK)
         except Exception as e:
             logger.error("Error retrieving configurations: %s", str(e))
@@ -71,13 +71,13 @@ class ConfigurationViewSet(viewsets.ViewSet):
                 configuration.save()
                 message = "Configuration created successfully"
                 status_ = status.HTTP_201_CREATED
-                resp = Resp(StatusDesc=message, StatusCode=status_, Result=ConfigurationSerializerGet(configuration).data)
+                resp = Resp(statusDesc=message, statusCode=status_, result=ConfigurationSerializerGet(configuration).data)
                 return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 logger.error("Error creating configuration: %s", str(e))
                 message = "Configuration creation failed"
                 status_ = status.HTTP_400_BAD_REQUEST
-                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
                 return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
         else:
             logger.error("Configuration creation failed: %s", serializer.errors)
@@ -118,18 +118,18 @@ class ConfigurationViewSet(viewsets.ViewSet):
 
                     message = "Configuration created successfully"
                     status_ = status.HTTP_201_CREATED
-                    resp = Resp(StatusDesc=message, StatusCode=status_, Result=ConfigurationSerializerGet(configuration).data)
+                    resp = Resp(statusDesc=message, statusCode=status_, result=ConfigurationSerializerGet(configuration).data)
                     return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
                 else:
                     message = "Configuration not found"
                     status_ = status.HTTP_404_NOT_FOUND
-                    resp = Resp(StatusDesc=message, StatusCode=status_, Result=None)
+                    resp = Resp(statusDesc=message, statusCode=status_, result=None)
                     return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_404_NOT_FOUND)
             except Exception as e:
                 logger.error("Error creating configuration: %s", str(e))
                 message = "Configuration creation failed"
                 status_ = status.HTTP_400_BAD_REQUEST
-                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
                 return Response(ConfigurationResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
         else:
             logger.error("Configuration creation failed: %s", serializer.errors)
@@ -153,7 +153,7 @@ class ConfigurationViewSet(viewsets.ViewSet):
                 message = "Invalid request"                                                                                                                                                                                                                                                                                                                                                                           
             configuration = ProcessConfig.objects.get(pk=pk)
             serializer = ConfigurationSerializerGet(configuration)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
             return Response(ConfigurationResponseSerializer(resp).data, status.HTTP_200_OK)
         except ProcessConfig.DoesNotExist:
             return Response({"error": "Configuration not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -176,7 +176,7 @@ class SystemUnitsViewSet(viewsets.ViewSet):
             logger.info("Retrieved system units: %s", system_units)
             serializer = SystemUnitsSerializerGet(system_units, many=True).data
             logger.info("Serialized system units: %s", serializer)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer)
             return Response(SystemUnitsResponseSerializer(resp).data, status.HTTP_200_OK)
         except Exception as e:
             logger.error("Error retrieving system units: %s", str(e))
@@ -204,13 +204,13 @@ class SystemUnitsViewSet(viewsets.ViewSet):
                 system_unit.save()
                 message = "System unit created successfully"
                 status_ = status.HTTP_201_CREATED
-                resp = Resp(StatusDesc=message, StatusCode=status_, Result=SystemUnitsSerializerGet(system_unit).data)
+                resp = Resp(statusDesc=message, statusCode=status_, result=SystemUnitsSerializerGet(system_unit).data)
                 return Response(SystemUnitsResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 logger.error("Error creating system unit: %s", str(e))
                 message = "System unit creation failed"
                 status_ = status.HTTP_400_BAD_REQUEST
-                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
                 return Response(SystemUnitsResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
         else:
             logger.error("System unit creation failed: %s", serializer.errors)
@@ -222,7 +222,7 @@ class SystemUnitsViewSet(viewsets.ViewSet):
             status_ = status.HTTP_200_OK
             system_unit = SystemUnits.objects.get(pk=pk)
             serializer = SystemUnitsSerializerGet(system_unit)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
             return Response(SystemUnitsResponseSerializer(resp).data, status.HTTP_200_OK)
         except SystemUnits.DoesNotExist:
             return Response({"error": "System unit not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -245,7 +245,7 @@ class CurrencyViewSet(viewsets.ViewSet):
             logger.info("Retrieved currencies: %s", currencies)
             serializer = CurrencySerializerList(currencies, many=True).data
             logger.info("Serialized currencies: %s", serializer)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer)
             return Response(CurrenciesResponseSerializer(resp).data, status.HTTP_200_OK)
         except Exception as e:
             logger.error("Error retrieving currencies: %s", str(e))
@@ -272,14 +272,14 @@ class CurrencyViewSet(viewsets.ViewSet):
                 currency.save()
                 message = "Currency created successfully"
                 status_ = status.HTTP_201_CREATED
-                resp = Resp(StatusDesc=message, StatusCode=status_, Result=CurrencySerializerList(currency).data)
+                resp = Resp(statusDesc=message, statusCode=status_, result=CurrencySerializerList(currency).data)
                 return Response(CurrencyResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 logger.error("Error creating currency: %s", str(e))
                 # return Response({"error": "Error creating currency"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 message = "Currency creation failed"
                 status_ = status.HTTP_400_BAD_REQUEST
-                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
                 return Response(CurrencyResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
         else:
             logger.error("Currency creation failed: %s", serializer.errors)
@@ -291,7 +291,7 @@ class CurrencyViewSet(viewsets.ViewSet):
             status_ = status.HTTP_200_OK
             currency = Currency.objects.get(pk=pk)
             serializer = CurrencySerializerList(currency)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
             return Response(CurrencyResponseSerializer(resp).data, status.HTTP_200_OK)
         except Currency.DoesNotExist:
             return Response({"error": "Currency not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -314,7 +314,7 @@ class FXViewSet(viewsets.ViewSet):
             logger.info("Retrieved configurations: %s", configurations)
             serializer = FXSerializerGet(configurations, many=True).data
             logger.info("Serialized configurations: %s", serializer)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer)
             return Response(FXResponseSerializer(resp).data, status.HTTP_200_OK)
         except Exception as e:
             logger.error("Error retrieving FX rates: %s", str(e))
@@ -338,7 +338,7 @@ class FXViewSet(viewsets.ViewSet):
                 updated_at=timezone.now()
             )
             fx_rate.save()
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=FXSerializerGet(fx_rate).data)
+            resp = Resp(statusDesc=message, statusCode=status_, result=FXSerializerGet(fx_rate).data)
             return Response(FXResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
         else:
             logger.error("FX rate creation failed: %s", serializer.errors)
@@ -350,7 +350,7 @@ class FXViewSet(viewsets.ViewSet):
             status_ = status.HTTP_200_OK
             fx_rate = FX.objects.get(pk=pk)
             serializer = FXSerializerGet(fx_rate)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
             return Response(FXResponseSerializer(resp).data, status.HTTP_200_OK)
         except FX.DoesNotExist:
             return Response({"error": "FX rate not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -374,7 +374,7 @@ class ReceiptViewSet(viewsets.ViewSet):
             logger.info("Retrieved receipts: %s", receipts)
             serializer = ReceiptSerializerList(receipts, many=True).data
             logger.info("Serialized receipts: %s", serializer)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer)
             return Response(ReceiptsResponseSerializer(resp).data, status.HTTP_200_OK)
         except Exception as e:
             logger.error("Error retrieving receipts: %s", str(e))
@@ -420,19 +420,19 @@ class ReceiptViewSet(viewsets.ViewSet):
                     
                     message = "Receipt created successfully"
                     status_ = status.HTTP_201_CREATED
-                    resp = Resp(StatusDesc=message, StatusCode=status_, Result=ReceiptSerializerList(receipt).data)
+                    resp = Resp(statusDesc=message, statusCode=status_, result=ReceiptSerializerList(receipt).data)
                     return Response(ReceiptResponseSerializer(resp).data, status=status.HTTP_201_CREATED)
                 except Exception as e:
                     logger.error("Error creating records for receipt: %s", str(e))
                     message = "Receipt creation failed"
                     status_ = status.HTTP_400_BAD_REQUEST
-                    resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                    resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
                     return Response(ReceiptResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 logger.error("Error creating receipt: %s", str(e))
                 message = "Receipt creation failed"
                 status_ = status.HTTP_400_BAD_REQUEST
-                resp = Resp(StatusDesc=message, StatusCode=status_, Result=str(e))
+                resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
                 return Response(ReceiptResponseSerializer(resp).data, status=status.HTTP_400_BAD_REQUEST)
         else:
             logger.error("Receipt creation failed: %s", serializer.errors)
@@ -444,8 +444,8 @@ class ReceiptViewSet(viewsets.ViewSet):
             status_ = status.HTTP_200_OK
             receipt = Receipt.objects.get(pk=pk)
             serializer = ReceiptSerializerList(receipt)
-            resp = Resp(StatusDesc=message, StatusCode=status_, Result=serializer.data)
-            return Response(ReceiptResponseSerializer(resp).data, status.HTTP_200_OK)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
+            return Response(ReceiptResponseSerializer(resp).data, status=status.HTTP_200_OK)
         except Receipt.DoesNotExist:
             return Response({"error": "Receipt not found"}, status=status.HTTP_404_NOT_FOUND)
         
