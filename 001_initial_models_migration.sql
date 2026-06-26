@@ -92,3 +92,34 @@ CREATE TABLE IF NOT EXISTS eezy_source_fx (
     INDEX idx_fx_send_currency_id (sendCurrency_id),
     INDEX idx_fx_receive_currency_id (receiveCurrency_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Incremental schema update: add Business model + ProcessConfig.business FK
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS eezy_source_business (
+    businessId INT AUTO_INCREMENT PRIMARY KEY,
+    businessName VARCHAR(100) NULL,
+    businessPhone VARCHAR(100) NULL,
+    businessEmail VARCHAR(100) NULL,
+    businessAddress VARCHAR(100) NULL,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE eezy_source_processconfig
+    ADD COLUMN business_id INT NULL;
+
+ALTER TABLE eezy_source_processconfig
+    ADD INDEX idx_processconfig_business_id (business_id);
+
+ALTER TABLE eezy_source_processconfig
+    ADD CONSTRAINT fk_processconfig_business
+        FOREIGN KEY (business_id)
+        REFERENCES eezy_source_business(businessId)
+        ON DELETE CASCADE;
+
+-- Optional hardening after backfilling existing rows:
+-- ALTER TABLE eezy_source_processconfig
+--     MODIFY business_id INT NOT NULL;

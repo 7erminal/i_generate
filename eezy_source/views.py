@@ -105,6 +105,7 @@ class ConfigurationViewSet(viewsets.ViewSet):
             return Response(ConfigurationResponseSerializer(resp).data, status=status_)
     
     def update(self, request, pk=None):
+        logger.info("Received request data for configuration update: %s", request.data)
         message = "Configuration created successfully"
         status_ = status.HTTP_201_CREATED
         serializer = ConfigurationSerializer(data=request.data)
