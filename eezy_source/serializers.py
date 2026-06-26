@@ -19,7 +19,14 @@ class ConfigurationSerializer(serializers.Serializer):
     shippingMarginUnit = serializers.CharField(max_length=100, required=False)
     defaultCurrency = serializers.CharField(max_length=100, required=False)
 
+class BusinessSerializer(serializers.Serializer):
+    businessName = serializers.CharField(max_length=100)
+    businessPhone = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    businessEmail = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    businessAddress = serializers.CharField(max_length=100, required=False, allow_blank=True)
+
 class ConfigurationSerializerGet(serializers.ModelSerializer):
+    business = BusinessSerializer()
     class Meta:
         model = ProcessConfig
         fields = '__all__'
