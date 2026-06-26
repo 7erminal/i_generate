@@ -20,6 +20,10 @@ class Resp:
 
 # Create your views here.
 class ConfigurationViewSet(viewsets.ViewSet):
+    lookup_field = 'processCode'
+    lookup_url_kwarg = 'pk'
+    lookup_value_regex = '[^/]+'
+
     def list(self, request):
         # Logic to list configurations
         message = "Configurations retrieved successfully"
@@ -123,7 +127,8 @@ class ConfigurationViewSet(viewsets.ViewSet):
             shippingMarginUnit = serializer.validated_data.get('shippingMarginUnit')
             defaultCurrency = serializer.validated_data.get('defaultCurrency')
             try:
-                configuration = ProcessConfig.objects.filter(processCode=process_code).first()
+                process_code_lookup = pk or process_code
+                configuration = ProcessConfig.objects.filter(processCode=process_code_lookup).first()
                 if configuration:
                     configuration.sellerShipperDeliveryFee = seller_shipper_delivery_fee
                     configuration.sellerShipperDeliveryFeeUnit = seller_shipper_delivery_fee_unit
@@ -227,19 +232,13 @@ class ConfigurationViewSet(viewsets.ViewSet):
         try:
             message = "Configuration retrieved successfully"
             status_ = status.HTTP_200_OK
-            code = request.query_params.get('code', None)
-            if code:
-                configuration = ProcessConfig.objects.filter(processCode=code).first()
-                if configuration:
-                    status_ = status.HTTP_200_OK
-                    message = "Configuration retrieved successfully"
-                else:
-                    status_ = status.HTTP_404_NOT_FOUND
-                    message = "Configuration not found"
-            else:
+            if not pk:
                 status_ = status.HTTP_400_BAD_REQUEST
-                message = "Invalid request"                                                                                                                                                                                                                                                                                                                                                                           
-            configuration = ProcessConfig.objects.get(pk=pk)
+                message = "Invalid request"
+                resp = Resp(statusDesc=message, statusCode=status_, result=None)
+                return Response(ConfigurationResponseSerializer(resp).data, status=status_)
+
+            configuration = ProcessConfig.objects.get(processCode=pk)
             serializer = ConfigurationSerializerGet(configuration)
             resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
             return Response(ConfigurationResponseSerializer(resp).data, status=status_)
