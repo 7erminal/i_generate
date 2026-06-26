@@ -283,6 +283,7 @@ class CurrencyViewSet(viewsets.ViewSet):
 
     def create(self, request):
         # Logic to create a new currency
+        logger.info("Received request data for currency creation: %s", request.data)
         message = "Currency created successfully"
         status_ = status.HTTP_201_CREATED
         serializer = CurrencySerializer(data=request.data)
@@ -303,6 +304,7 @@ class CurrencyViewSet(viewsets.ViewSet):
                 message = "Currency created successfully"
                 status_ = status.HTTP_201_CREATED
                 resp = Resp(statusDesc=message, statusCode=status_, result=CurrencySerializerList(currency).data)
+                logger.info("Currency created successfully: %s", resp)
                 return Response(CurrencyResponseSerializer(resp).data, status=status_)
             except Exception as e:
                 logger.error("Error creating currency: %s", str(e))
@@ -319,14 +321,17 @@ class CurrencyViewSet(viewsets.ViewSet):
             return Response(CurrencyResponseSerializer(resp).data, status=status_)
     
     def retrieve(self, request, pk=None):
+        logger.info("Retrieving currency with ID: %s", pk)
         try:
             message = "Currency retrieved successfully"
             status_ = status.HTTP_200_OK
             currency = Currency.objects.get(pk=pk)
             serializer = CurrencySerializerList(currency)
+            logger.info("Currency retrieved successfully: %s", serializer.data)
             resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
             return Response(CurrencyResponseSerializer(resp).data, status=status_)
         except Currency.DoesNotExist:
+            logger.error("Currency with ID %s not found", pk)
             message = "Currency not found"
             status_ = status.HTTP_404_NOT_FOUND
             resp = Resp(statusDesc=message, statusCode=status_, result=None)
@@ -344,6 +349,7 @@ class CurrencyViewSet(viewsets.ViewSet):
             message = "Currency not found"
             status_ = status.HTTP_404_NOT_FOUND
             resp = Resp(statusDesc=message, statusCode=status_, result=None)
+            logger.error("Currency with ID %s not found", pk)
             return Response(CurrencyResponseSerializer(resp).data, status=status_)
               
 class FXViewSet(viewsets.ViewSet):
