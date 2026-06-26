@@ -1,4 +1,4 @@
-from time import timezone
+from django.utils import timezone
 
 from django.shortcuts import render
 
@@ -296,9 +296,7 @@ class CurrencyViewSet(viewsets.ViewSet):
                     currencyName=name,
                     currencyCode=code,
                     currencySymbol=symbol,
-                    active=True,
-                    created_at=timezone.now(),
-                    modified_at=timezone.now()
+                    active=True
                 )
                 currency.save()
                 message = "Currency created successfully"
@@ -384,9 +382,7 @@ class FXViewSet(viewsets.ViewSet):
                 sendCurrency=sendCurrency,
                 receiveCurrency=receiveCurrency,
                 exchangeRate=exchangeRate,
-                active=True,
-                created_at=timezone.now(),
-                updated_at=timezone.now()
+                active=True
             )
             fx_rate.save()
             resp = Resp(statusDesc=message, statusCode=status_, result=FXSerializerGet(fx_rate).data)
@@ -460,8 +456,6 @@ class ReceiptViewSet(viewsets.ViewSet):
                     receiptName=receiptName,
                     receiptCode=receiptCode,
                     active=True,
-                    created_at=timezone.now(),
-                    updated_at=timezone.now(),
                     created_by=createdBy if createdBy else (request.user.username if request.user.is_authenticated else 'Anonymous'),
                     updated_by=createdBy if createdBy else (request.user.username if request.user.is_authenticated else 'Anonymous')
                 )
@@ -480,7 +474,6 @@ class ReceiptViewSet(viewsets.ViewSet):
                             quantity=quantity,
                             totalCost=totalCost,
                             receipt=receipt,
-                            created_at=timezone.now(),
                             active=True
                         ).save()
                     
