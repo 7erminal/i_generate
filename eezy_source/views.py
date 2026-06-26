@@ -48,6 +48,20 @@ class ConfigurationViewSet(viewsets.ViewSet):
         status_ = status.HTTP_201_CREATED
         serializer = ConfigurationSerializer(data=request.data)
         if serializer.is_valid():
+            business_name = serializer.validated_data.get('businessName')
+            business_phone = serializer.validated_data.get('businessPhone')
+            business_email = serializer.validated_data.get('businessEmail')
+            business_address = serializer.validated_data.get('businessAddress')
+
+            business = Business.objects.create(
+                businessName=business_name,
+                businessPhone=business_phone,
+                businessEmail=business_email,
+                businessAddress=business_address
+            )
+
+            business.save()
+            
             process_code = serializer.validated_data.get('processCode')
             seller_shipper_delivery_fee = serializer.validated_data.get('sellerShipperDeliveryFee')
             seller_shipper_delivery_fee_unit = serializer.validated_data.get('sellerShipperDeliveryFeeUnit')
@@ -73,23 +87,10 @@ class ConfigurationViewSet(viewsets.ViewSet):
                     customRateUnit=customRateUnit,
                     shippingMargin=shippingMargin,
                     shippingMarginUnit=shippingMarginUnit,
-                    defaultCurrency=defaultCurrency
+                    defaultCurrency=defaultCurrency,
+                    business=business
                 )
                 configuration.save()
-
-                business_name = serializer.validated_data.get('businessName')
-                business_phone = serializer.validated_data.get('businessPhone')
-                business_email = serializer.validated_data.get('businessEmail')
-                business_address = serializer.validated_data.get('businessAddress')
-
-                business = Business.objects.create(
-                    businessName=business_name,
-                    businessPhone=business_phone,
-                    businessEmail=business_email,
-                    businessAddress=business_address
-                )
-
-                business.save()
                 
                 message = "Configuration created successfully"
                 status_ = status.HTTP_201_CREATED
@@ -162,6 +163,20 @@ class ConfigurationViewSet(viewsets.ViewSet):
                     resp = Resp(statusDesc=message, statusCode=status_, result=ConfigurationSerializerGet(configuration).data)
                     return Response(ConfigurationResponseSerializer(resp).data, status=status_)
                 else:
+                    business_name = serializer.validated_data.get('businessName')
+                    business_phone = serializer.validated_data.get('businessPhone')
+                    business_email = serializer.validated_data.get('businessEmail')
+                    business_address = serializer.validated_data.get('businessAddress')
+
+                    business = Business.objects.create(
+                        businessName=business_name,
+                        businessPhone=business_phone,
+                        businessEmail=business_email,
+                        businessAddress=business_address
+                    )
+
+                    business.save()
+                    
                     process_code = serializer.validated_data.get('processCode')
                     seller_shipper_delivery_fee = serializer.validated_data.get('sellerShipperDeliveryFee')
                     seller_shipper_delivery_fee_unit = serializer.validated_data.get('sellerShipperDeliveryFeeUnit')
@@ -187,23 +202,10 @@ class ConfigurationViewSet(viewsets.ViewSet):
                             customRateUnit=customRateUnit,
                             shippingMargin=shippingMargin,
                             shippingMarginUnit=shippingMarginUnit,
-                            defaultCurrency=defaultCurrency
+                            defaultCurrency=defaultCurrency,
+                            business=business
                         )
                         configuration.save()
-
-                        business_name = serializer.validated_data.get('businessName')
-                        business_phone = serializer.validated_data.get('businessPhone')
-                        business_email = serializer.validated_data.get('businessEmail')
-                        business_address = serializer.validated_data.get('businessAddress')
-
-                        business = Business.objects.create(
-                            businessName=business_name,
-                            businessPhone=business_phone,
-                            businessEmail=business_email,
-                            businessAddress=business_address
-                        )
-
-                        business.save()
 
                         message = "Configuration created successfully"
                         status_ = status.HTTP_201_CREATED
