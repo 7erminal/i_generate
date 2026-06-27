@@ -123,3 +123,13 @@ ALTER TABLE eezy_source_processconfig
 -- Optional hardening after backfilling existing rows:
 -- ALTER TABLE eezy_source_processconfig
 --     MODIFY business_id INT NOT NULL;
+
+-- ---------------------------------------------------------------------------
+-- Incremental schema update: add weight and deliveryFee to Record model
+-- ---------------------------------------------------------------------------
+
+ALTER TABLE eezy_source_record
+    ADD COLUMN weight DOUBLE NULL;
+
+ALTER TABLE eezy_source_record
+    ADD COLUMN deliveryFee DOUBLE NULL;

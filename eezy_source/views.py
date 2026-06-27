@@ -547,11 +547,15 @@ class ReceiptViewSet(viewsets.ViewSet):
                         itemName = record_data.get('itemName')
                         itemCost = record_data.get('itemCost')
                         quantity = record_data.get('quantity')
+                        weight = record_data.get('weight')
+                        deliveryFee = record_data.get('deliveryFee')
                         totalCost = itemCost * quantity if itemCost and quantity else None
                         Record.objects.create(
                             itemName=itemName,
                             itemCost=itemCost,
                             quantity=quantity,
+                            weight=weight,
+                            deliveryFee=deliveryFee,
                             totalCost=totalCost,
                             receipt=receipt,
                             active=True

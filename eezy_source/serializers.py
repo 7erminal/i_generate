@@ -43,23 +43,27 @@ class ConfigurationsResponseSerializer(serializers.Serializer):
     result = ConfigurationSerializerGet(many=True)
 
 class RecordSerializer(serializers.ModelSerializer):
+    itemName = serializers.CharField(max_length=200)
+    itemCost = serializers.FloatField(required=False)
+    weight = serializers.FloatField(required=False)
+    quantity = serializers.IntegerField(required=False)
+    deliveryFee = serializers.FloatField(required=False)    
+
+class RecordSerializerList(serializers.ModelSerializer):
     class Meta:
         model = Record
         fields = '__all__'
+        depth = 1
 
 class ReceiptSerializer(serializers.Serializer):
     receiptCode = serializers.CharField(max_length=100)
     receiptName = serializers.CharField(max_length=100, required=False)
-    itemName = serializers.CharField(max_length=40)
     createdBy = serializers.CharField(max_length=100, required=False)
-    itemCost = serializers.FloatField(required=False)
-    quantity = serializers.IntegerField(required=False)
+    items = RecordSerializer(many=True, required=False)
     active = serializers.BooleanField(required=False)
 
 class ReceiptSerializerList(serializers.ModelSerializer):
-    # category = CategorySerializerGet()
-    # language = LanguageSerializerGet()
-    records = RecordSerializer(many=True, read_only=True)
+    records = RecordSerializerList(many=True, read_only=True)
     class Meta:
         model = Receipt
         fields = '__all__'
