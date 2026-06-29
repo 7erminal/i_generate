@@ -42,7 +42,7 @@ class ConfigurationsResponseSerializer(serializers.Serializer):
     statusDesc = serializers.CharField()
     result = ConfigurationSerializerGet(many=True)
 
-class RecordSerializer(serializers.ModelSerializer):
+class RecordSerializer(serializers.Serializer):
     itemName = serializers.CharField(max_length=200)
     itemCost = serializers.FloatField(required=False)
     weight = serializers.FloatField(required=False)
