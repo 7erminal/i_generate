@@ -524,6 +524,7 @@ class ReceiptViewSet(viewsets.ViewSet):
 
     def create(self, request):
         # Logic to create a new receipt
+        logger.info("Received request data for receipt creation: %s", request.data)
         message = "Receipt created successfully"
         status_ = status.HTTP_201_CREATED
         serializer = ReceiptSerializer(data=request.data)
