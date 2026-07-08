@@ -1,6 +1,18 @@
 from django.db import models
 
 # Create your models here.
+class User(models.Model):
+    userId = models.AutoField(primary_key=True)
+    firstName = models.CharField(max_length=100, null=True, blank=True)
+    lastName = models.CharField(max_length=100, null=True, blank=True)
+    username = models.CharField(max_length=100, null=True, blank=True)
+    email = models.CharField(max_length=100, null=True, blank=True)
+    phoneNumber = models.CharField(max_length=100, null=True, blank=True)
+    password = models.CharField(max_length=200, null=True, blank=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True)
+
 class Business(models.Model):
     businessId = models.AutoField(primary_key=True)
     businessName = models.CharField(max_length=100, null=True, blank=True)
@@ -14,7 +26,7 @@ class Business(models.Model):
 class ProcessConfig(models.Model):
     processConfigId = models.AutoField(primary_key=True)
     processCode = models.CharField(max_length=100)
-    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='process_business')
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='process_business', default=None)
     sellerShipperDeliveryFee = models.FloatField(null=True, blank=True)
     sellerShipperDeliveryFeeUnit = models.CharField(max_length=100, null=True, blank=True)
     handlingFee = models.FloatField(null=True, blank=True)

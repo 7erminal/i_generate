@@ -12,8 +12,7 @@ router.register(r'receipts', views.ReceiptViewSet, basename='receipt')
 
 urlpatterns = [
     path('api/', include(router.urls)),
-    # path('api/videos/', views.VideoUploadView.as_view({'get': 'list', 'post': 'create'}), name='video-list'),
-    # path('api/languages/', views.LanguageViewSet.as_view({'get': 'list', 'post': 'create'}), name='language-list'),
-    # path('api/categories/', views.CategoryViewSet.as_view({'get': 'list', 'post': 'create'}), name='category-list'),
+    path('register/', views.UserRegistrationView.as_view(), name='register'),
+    path('login/', views.UserLoginView.as_view(), name='login'),
 # 
 ]

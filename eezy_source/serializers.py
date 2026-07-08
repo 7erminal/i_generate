@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from eezy_source.models import Receipt, ProcessConfig, Record, FX, SystemUnits, Currency
+from eezy_source.models import Receipt, ProcessConfig, Record, FX, SystemUnits, Currency, User
 
 class ConfigurationSerializer(serializers.Serializer):
     businessName = serializers.CharField(max_length=100)
@@ -143,3 +143,21 @@ class CurrenciesResponseSerializer(serializers.Serializer):
     statusCode = serializers.IntegerField()
     statusDesc = serializers.CharField()
     result = CurrencySerializerList(many=True)
+
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'email', 'firstName', 'lastName', 'phoneNumber']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            firstName=validated_data['firstName'],
+            lastName=validated_data['lastName'],
+            username=validated_data['username'],
+            password=validated_data['password'],
+            phoneNumber=validated_data['phoneNumber'],
+            email=validated_data.get('email')
+        )
+        return user

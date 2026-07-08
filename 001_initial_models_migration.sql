@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS eezy_source_business (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 ALTER TABLE eezy_source_processconfig
-    ADD COLUMN business_id INT NULL;
+    ADD COLUMN IF NOT EXISTS business_id INT NULL;
 
 ALTER TABLE eezy_source_processconfig
     ADD INDEX idx_processconfig_business_id (business_id);
@@ -133,3 +133,8 @@ ALTER TABLE eezy_source_record
 
 ALTER TABLE eezy_source_record
     ADD COLUMN deliveryFee DOUBLE NULL;
+
+ALTER TABLE eezy_source_user
+    ADD COLUMN username VARCHAR(100) NULL;
+
+
