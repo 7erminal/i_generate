@@ -10,7 +10,7 @@ import logging
 from eezy_source.models import Currency, ProcessConfig, SystemUnits, FX, Receipt, Record, Business
 logger = logging.getLogger("django")
 
-from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, SystemUnitResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer, UserSerializer 
+from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, LoginResponseSerializer, LoginSerializer, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, RegisterResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer, UserSerializer 
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
@@ -23,17 +23,37 @@ class Resp:
 
 # Create your views here.
 class UserRegistrationView(generics.CreateAPIView):
-    serializer_class = UserSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
+        message = "User registered successfully"
+        status_ = status.HTTP_201_CREATED
+        resp = Resp(statusDesc=message, statusCode=status_, result=token.key)
+        return Response(RegisterResponseSerializer(resp).data, status=status_)
+
+        
 
 class UserLoginView(APIView):
    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password=password)  # Authenticate the user
-        if user is not None:
-            token, created = Token.objects.get_or_create(user=user)  # Create or retrieve a token for the user
-            return Response({'token': token.key}, status=status.HTTP_200_OK)
-        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        message = "Login failed"
+        status_ = status.HTTP_400_BAD_REQUEST
+        result = None
+
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+            user = authenticate(username=username, password=password)  # Authenticate the user
+            if user is not None:
+                token, created = Token.objects.get_or_create(user=user)  # Create or retrieve a token for the user
+                message = "Login successful"
+                status_ = status.HTTP_200_OK
+                result = token.key
+        resp = Resp(statusDesc=message, statusCode=status_, result=result)
+        return Response(LoginResponseSerializer(resp).data, status=status_)
 
 class ConfigurationViewSet(viewsets.ViewSet):
     lookup_field = 'processCode'

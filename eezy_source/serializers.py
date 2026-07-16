@@ -1,5 +1,44 @@
 from rest_framework import serializers
-from eezy_source.models import Receipt, ProcessConfig, Record, FX, SystemUnits, Currency, User
+from django.contrib.auth import get_user_model
+from eezy_source.models import Receipt, ProcessConfig, Record, FX, SystemUnits, Currency
+
+User = get_user_model()
+
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    firstName = serializers.CharField(source='first_name', required=False, allow_blank=True)
+    lastName = serializers.CharField(source='last_name', required=False, allow_blank=True)
+    phoneNumber = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'email', 'firstName', 'lastName', 'phoneNumber']
+
+    def create(self, validated_data):
+        # phoneNumber is accepted for backward compatibility, but Django's default User has no such field.
+        validated_data.pop('phoneNumber', None)
+        user = User.objects.create_user(
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            username=validated_data['username'],
+            password=validated_data['password'],
+            email=validated_data.get('email')
+        )
+        return user
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+class RegisterResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = serializers.CharField()
+
+class LoginResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = serializers.CharField()
 
 class ConfigurationSerializer(serializers.Serializer):
     businessName = serializers.CharField(max_length=100)
@@ -143,21 +182,3 @@ class CurrenciesResponseSerializer(serializers.Serializer):
     statusCode = serializers.IntegerField()
     statusDesc = serializers.CharField()
     result = CurrencySerializerList(many=True)
-
-class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    
-    class Meta:
-        model = User
-        fields = ['username', 'password', 'email', 'firstName', 'lastName', 'phoneNumber']
-
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            firstName=validated_data['firstName'],
-            lastName=validated_data['lastName'],
-            username=validated_data['username'],
-            password=validated_data['password'],
-            phoneNumber=validated_data['phoneNumber'],
-            email=validated_data.get('email')
-        )
-        return user
