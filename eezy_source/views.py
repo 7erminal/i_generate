@@ -75,6 +75,7 @@ class UserLoginView(APIView):
         else:
             message = "Invalid login payload"
             logger.warning("Login payload validation failed: %s", serializer.errors)
+        logger.info("Login response: status=%s, message=%s", status_, message)
         resp = Resp(statusDesc=message, statusCode=status_, result=result)
         return Response(LoginResponseSerializer(resp).data, status=status_)
 
