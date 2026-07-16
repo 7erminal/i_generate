@@ -52,6 +52,7 @@ class UserProfileView(APIView):
 
 class UserLoginView(APIView):
    def post(self, request):
+        logger.info("Login attempt received")
         message = "Login failed"
         status_ = status.HTTP_400_BAD_REQUEST
         result = None
@@ -60,12 +61,20 @@ class UserLoginView(APIView):
         if serializer.is_valid():
             username = serializer.validated_data['phoneNumber']
             password = serializer.validated_data['password']
+            logger.info("Login validation passed for phoneNumber=%s", username)
             user = authenticate(username=username, password=password)  # Authenticate the user
             if user is not None:
                 token, created = Token.objects.get_or_create(user=user)  # Create or retrieve a token for the user
                 message = "Login successful"
                 status_ = status.HTTP_200_OK
                 result = token.key
+                logger.info("Login successful for phoneNumber=%s", username)
+            else:
+                message = "Invalid phone number or password"
+                logger.warning("Login authentication failed for phoneNumber=%s", username)
+        else:
+            message = "Invalid login payload"
+            logger.warning("Login payload validation failed: %s", serializer.errors)
         resp = Resp(statusDesc=message, statusCode=status_, result=result)
         return Response(LoginResponseSerializer(resp).data, status=status_)
 
