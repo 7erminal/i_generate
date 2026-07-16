@@ -66,7 +66,6 @@ class UserLoginView(APIView):
                 message = "Login successful"
                 status_ = status.HTTP_200_OK
                 result = token.key
-                
         resp = Resp(statusDesc=message, statusCode=status_, result=result)
         return Response(LoginResponseSerializer(resp).data, status=status_)
 
