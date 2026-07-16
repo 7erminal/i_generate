@@ -4,6 +4,8 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 import logging
 
@@ -33,6 +35,18 @@ class UserRegistrationView(generics.CreateAPIView):
         status_ = status.HTTP_201_CREATED
         resp = Resp(statusDesc=message, statusCode=status_, result=token.key)
         return Response(RegisterResponseSerializer(resp).data, status=status_)
+
+
+class UserProfileView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        message = "User retrieved successfully"
+        status_ = status.HTTP_200_OK
+        serializer = UserSerializer(request.user)
+        resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
+        return Response(resp.__dict__, status=status_)
 
         
 

@@ -4,6 +4,9 @@ from eezy_source.models import Receipt, ProcessConfig, Record, FX, SystemUnits, 
 
 User = get_user_model()
 
+class TokenSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=255)
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     firstName = serializers.CharField(source='first_name', required=False, allow_blank=True)
