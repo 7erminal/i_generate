@@ -58,7 +58,7 @@ class UserLoginView(APIView):
 
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            username = serializer.validated_data['username']
+            username = serializer.validated_data['phoneNumber']
             password = serializer.validated_data['password']
             user = authenticate(username=username, password=password)  # Authenticate the user
             if user is not None:

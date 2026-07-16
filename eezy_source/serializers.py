@@ -11,15 +11,13 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     firstName = serializers.CharField(source='first_name', required=False, allow_blank=True)
     lastName = serializers.CharField(source='last_name', required=False, allow_blank=True)
-    phoneNumber = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    phoneNumber = serializers.CharField(source='username')
     
     class Meta:
         model = User
-        fields = ['username', 'password', 'email', 'firstName', 'lastName', 'phoneNumber']
+        fields = ['phoneNumber', 'password', 'email', 'firstName', 'lastName']
 
     def create(self, validated_data):
-        # phoneNumber is accepted for backward compatibility, but Django's default User has no such field.
-        validated_data.pop('phoneNumber', None)
         user = User.objects.create_user(
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
@@ -30,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    phoneNumber = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
 class RegisterResponseSerializer(serializers.Serializer):
