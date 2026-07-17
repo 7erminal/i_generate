@@ -107,7 +107,7 @@ class ReceiptSerializerList(serializers.ModelSerializer):
     records_count = serializers.SerializerMethodField()
 
     def get_records_count(self, obj):
-        return Record.objects.filter(receipt=obj.receiptId).count()
+        return Record.objects.filter(receipt=obj).count()
     class Meta:
         model = Receipt
         fields = '__all__'
