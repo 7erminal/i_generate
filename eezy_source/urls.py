@@ -9,6 +9,7 @@ router.register(r'unit', views.SystemUnitsViewSet, basename='unit')
 router.register(r'configs', views.ConfigurationViewSet, basename='config')
 router.register(r'fx', views.FXViewSet, basename='fx')
 router.register(r'receipts', views.ReceiptViewSet, basename='receipt')
+router.register(r'records', views.RecordViewSet, basename='record')
 
 urlpatterns = [
     path('api/', include(router.urls)),

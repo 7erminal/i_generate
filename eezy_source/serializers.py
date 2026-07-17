@@ -104,6 +104,10 @@ class ReceiptSerializer(serializers.Serializer):
 
 class ReceiptSerializerList(serializers.ModelSerializer):
     records = RecordSerializerList(many=True, read_only=True)
+    records_count = serializers.SerializerMethodField()
+
+    def get_records_count(self, obj):
+        return obj.records.count()
     class Meta:
         model = Receipt
         fields = '__all__'
@@ -183,3 +187,8 @@ class CurrenciesResponseSerializer(serializers.Serializer):
     statusCode = serializers.IntegerField()
     statusDesc = serializers.CharField()
     result = CurrencySerializerList(many=True)
+
+class RecordsResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = RecordSerializerList(many=True)

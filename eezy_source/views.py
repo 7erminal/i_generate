@@ -12,7 +12,7 @@ import logging
 from eezy_source.models import Currency, ProcessConfig, SystemUnits, FX, Receipt, Record, Business
 logger = logging.getLogger("django")
 
-from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, LoginResponseSerializer, LoginSerializer, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, RegisterResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer, UserSerializer 
+from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, LoginResponseSerializer, LoginSerializer, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, RecordSerializerList, RecordsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, RegisterResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer, UserSerializer 
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
@@ -733,3 +733,24 @@ class ReceiptViewSet(viewsets.ViewSet):
             resp = Resp(statusDesc=message, statusCode=status_, result=None)
             gStatus_ = status_
             return Response(ReceiptResponseSerializer(resp).data, status=gStatus_)
+        
+class RecordViewSet(viewsets.ViewSet):
+    def list(self, request, receipt_id=None):
+        # Logic to list records for a specific receipt
+        message = "Records retrieved successfully"
+        status_ = status.HTTP_200_OK
+        try:
+            records = Record.objects.filter(receipt__receiptId=receipt_id)
+            logger.info("Retrieved records for receipt %s: %s", receipt_id, records)
+            serializer = RecordSerializerList(records, many=True).data
+            logger.info("Serialized records: %s", serializer)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer)
+            gStatus_ = status_
+            return Response(RecordsResponseSerializer(resp).data, status=gStatus_)
+        except Exception as e:
+            logger.error("Error retrieving records for receipt %s: %s", receipt_id, str(e))
+            message = "Error retrieving records"
+            status_ = status.HTTP_500_INTERNAL_SERVER_ERROR
+            resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
+            gStatus_ = status_
+            return Response(RecordsResponseSerializer(resp).data, status=gStatus_)
