@@ -656,7 +656,7 @@ class ReceiptViewSet(viewsets.ViewSet):
                 receipt.save()
 
                 try:
-                    records_data = request.data.get('records', [])
+                    records_data = serializer.validated_data.get('items', [])
                     for record_data in records_data:
                         itemName = record_data.get('itemName')
                         itemCost = record_data.get('itemCost')
