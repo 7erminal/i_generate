@@ -107,6 +107,13 @@ class ReceiptSerializerList(serializers.ModelSerializer):
     records_count = serializers.SerializerMethodField()
 
     def get_records_count(self, obj):
+        # obj can be a Receipt model instance or a serialized dict depending on caller.
+        if isinstance(obj, dict):
+            receipt_id = obj.get('receiptId')
+            if receipt_id is None:
+                return 0
+            return Record.objects.filter(receipt_id=receipt_id).count()
+
         return Record.objects.filter(receipt=obj).count()
     class Meta:
         model = Receipt
