@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from eezy_source.models import Receipt, ProcessConfig, Record, FX, SystemUnits, Currency
+from eezy_source.models import Receipt, ProcessConfig, ReceiptProcessConfig, Record, FX, SystemUnits, Currency
 
 User = get_user_model()
 
@@ -82,12 +82,39 @@ class ConfigurationsResponseSerializer(serializers.Serializer):
     statusDesc = serializers.CharField()
     result = ConfigurationSerializerGet(many=True)
 
+class ReceiptProcessConfigUpdateSerializer(serializers.Serializer):
+    sellerShipperDeliveryFee = serializers.FloatField(required=False)
+    sellerShipperDeliveryFeeUnit = serializers.CharField(max_length=100, required=False)
+    handlingFee = serializers.FloatField(required=False)
+    handlingFeeUnit = serializers.CharField(max_length=100, required=False)
+    weightUnit = serializers.CharField(max_length=100, required=False)
+    shippingMode = serializers.CharField(max_length=100, required=False)
+    customRate = serializers.FloatField(required=False)
+    customRateUnit = serializers.CharField(max_length=100, required=False)
+    shippingMargin = serializers.FloatField(required=False)
+    shippingMarginUnit = serializers.CharField(max_length=100, required=False)
+    transportationFee = serializers.FloatField(required=False)
+    defaultCurrency = serializers.CharField(max_length=100, required=False)
+
+class ReceiptProcessConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReceiptProcessConfig
+        fields = '__all__'
+        depth = 1
+
+class ReceiptProcessConfigurationResponseSerializer(serializers.Serializer):
+    statusCode = serializers.IntegerField()
+    statusDesc = serializers.CharField()
+    result = ReceiptProcessConfigSerializer()
+
 class RecordSerializer(serializers.Serializer):
     itemName = serializers.CharField(max_length=200)
     itemCost = serializers.FloatField(required=False)
     weight = serializers.FloatField(required=False)
     quantity = serializers.IntegerField(required=False)
-    deliveryFee = serializers.FloatField(required=False)    
+    deliveryFee = serializers.FloatField(required=False)
+    handlingFee = serializers.FloatField(required=False)
+    margin = serializers.FloatField(required=False)
 
 class RecordSerializerList(serializers.ModelSerializer):
     class Meta:
@@ -99,6 +126,12 @@ class ReceiptSerializer(serializers.Serializer):
     receiptCode = serializers.CharField(max_length=100)
     receiptName = serializers.CharField(max_length=100, required=False)
     createdBy = serializers.CharField(max_length=100, required=False)
+    processCode = serializers.CharField(max_length=100)
+    customerName = serializers.CharField(max_length=200, required=False)
+    customerPhone = serializers.CharField(max_length=100, required=False)
+    customerEmail = serializers.CharField(max_length=100, required=False)
+    customerAddress = serializers.CharField(max_length=200, required=False)
+    transportationFee = serializers.FloatField(required=False)
     items = RecordSerializer(many=True, required=False)
     active = serializers.BooleanField(required=False)
 

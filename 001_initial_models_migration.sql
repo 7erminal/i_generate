@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS eezy_source_business (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 ALTER TABLE eezy_source_processconfig
-    ADD COLUMN IF NOT EXISTS business_id INT NULL;
+    ADD COLUMN business_id INT NULL;
 
 ALTER TABLE eezy_source_processconfig
     ADD INDEX idx_processconfig_business_id (business_id);
@@ -136,5 +136,79 @@ ALTER TABLE eezy_source_record
 
 ALTER TABLE eezy_source_user
     ADD COLUMN username VARCHAR(100) NULL;
+
+
+-- ---------------------------------------------------------------------------
+-- Incremental schema update: add new models/columns from latest models.py
+-- ---------------------------------------------------------------------------
+
+-- ProcessConfig: add costMarginPercentage
+ALTER TABLE eezy_source_processconfig 
+    ADD COLUMN costMarginPercentage DOUBLE NULL;
+
+-- Record: add handlingFee and margin
+ALTER TABLE eezy_source_record
+    ADD COLUMN handlingFee DOUBLE NULL;
+
+ALTER TABLE eezy_source_record
+    ADD COLUMN margin DOUBLE NULL;
+
+-- New model: ReceiptProcessConfig
+CREATE TABLE IF NOT EXISTS eezy_source_receiptprocessconfig (
+    receiptProcessConfigId INT AUTO_INCREMENT PRIMARY KEY,
+    sellerShipperDeliveryFee DOUBLE NULL,
+    sellerShipperDeliveryFeeUnit VARCHAR(100) NULL,
+    handlingFee DOUBLE NULL,
+    handlingFeeUnit VARCHAR(100) NULL,
+    weightUnit VARCHAR(100) NULL,
+    shippingMode VARCHAR(100) NULL,
+    customRate DOUBLE NULL,
+    customRateUnit VARCHAR(100) NULL,
+    shippingMargin DOUBLE NULL,
+    shippingMarginUnit VARCHAR(100) NULL,
+    costMarginPercentage DOUBLE NULL,
+    transportationFee DOUBLE NULL,
+    defaultCurrency VARCHAR(100) NULL,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- New model: Customer
+CREATE TABLE IF NOT EXISTS eezy_source_customer (
+    customerId INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(200) NULL,
+    phoneNumber VARCHAR(100) NULL,
+    email VARCHAR(100) NULL,
+    address VARCHAR(200) NULL,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Receipt: add Customer and ReceiptProcessConfig foreign keys
+ALTER TABLE eezy_source_receipt
+    ADD COLUMN customer_id INT NULL;
+
+ALTER TABLE eezy_source_receipt
+    ADD COLUMN receiptProcessConfig_id INT NULL;
+
+ALTER TABLE eezy_source_receipt
+    ADD INDEX idx_receipt_customer_id (customer_id);
+
+ALTER TABLE eezy_source_receipt
+    ADD INDEX idx_receipt_process_config_id (receiptProcessConfig_id);
+
+ALTER TABLE eezy_source_receipt
+    ADD CONSTRAINT fk_receipt_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES eezy_source_customer(customerId)
+        ON DELETE CASCADE;
+
+ALTER TABLE eezy_source_receipt
+    ADD CONSTRAINT fk_receipt_process_config
+        FOREIGN KEY (receiptProcessConfig_id)
+        REFERENCES eezy_source_receiptprocessconfig(receiptProcessConfigId)
+        ON DELETE CASCADE;
 
 

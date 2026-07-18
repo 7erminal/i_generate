@@ -9,10 +9,10 @@ from rest_framework.permissions import IsAuthenticated
 
 import logging
 
-from eezy_source.models import Currency, ProcessConfig, SystemUnits, FX, Receipt, Record, Business
+from eezy_source.models import Currency, ProcessConfig, ReceiptProcessConfig, SystemUnits, FX, Receipt, Record, Business, Customer
 logger = logging.getLogger("django")
 
-from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, LoginResponseSerializer, LoginSerializer, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, RecordSerializerList, RecordsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, RegisterResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer, UserSerializer 
+from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, LoginResponseSerializer, LoginSerializer, ReceiptProcessConfigSerializer, ReceiptProcessConfigUpdateSerializer, ReceiptProcessConfigurationResponseSerializer, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, RecordSerializerList, RecordsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, RegisterResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer, UserSerializer 
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
@@ -643,50 +643,94 @@ class ReceiptViewSet(viewsets.ViewSet):
         serializer = ReceiptSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                receiptName = serializer.validated_data.get('receiptName')
-                receiptCode = serializer.validated_data.get('receiptCode')
-                createdBy = serializer.validated_data.get('createdBy')
-                receipt = Receipt.objects.create(
-                    receiptName=receiptName,
-                    receiptCode=receiptCode,
-                    active=True,
-                    created_by=createdBy if createdBy else (request.user.username if request.user.is_authenticated else 'Anonymous'),
-                    updated_by=createdBy if createdBy else (request.user.username if request.user.is_authenticated else 'Anonymous')
+                customerName = serializer.validated_data.get('customerName')
+                customerEmail = serializer.validated_data.get('customerEmail')
+                customerPhone = serializer.validated_data.get('customerPhone')
+                customer = Customer.objects.create(
+                    name=customerName,
+                    email=customerEmail,
+                    phoneNumber=customerPhone,
                 )
-                receipt.save()
+                customer.save()
 
-                try:
-                    records_data = serializer.validated_data.get('items', [])
-                    for record_data in records_data:
-                        itemName = record_data.get('itemName')
-                        itemCost = record_data.get('itemCost')
-                        quantity = record_data.get('quantity')
-                        weight = record_data.get('weight')
-                        deliveryFee = record_data.get('deliveryFee')
-                        totalCost = itemCost * quantity if itemCost and quantity else None
-                        Record.objects.create(
-                            itemName=itemName,
-                            itemCost=itemCost,
-                            quantity=quantity,
-                            weight=weight,
-                            deliveryFee=deliveryFee,
-                            totalCost=totalCost,
-                            receipt=receipt,
-                            active=True
-                        ).save()
+                processCode = serializer.validated_data.get('processCode')
+                configuration = ProcessConfig.objects.filter(processCode=processCode).first()
+
+                if configuration:
+                    # Add receipt process config
+                    transportation_fee = serializer.validated_data.get('transportationFee')
                     
-                    message = "Receipt created successfully"
-                    status_ = status.HTTP_201_CREATED
-                    resp = Resp(statusDesc=message, statusCode=status_, result=ReceiptSerializerList(receipt).data)
-                    gStatus_ = status_
-                    return Response(ReceiptResponseSerializer(resp).data, status=gStatus_)
-                except Exception as e:
-                    logger.error("Error creating records for receipt: %s", str(e))
-                    message = "Receipt creation failed"
-                    status_ = status.HTTP_400_BAD_REQUEST
-                    resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
-                    gStatus_ = status_
-                    return Response(ReceiptResponseSerializer(resp).data, status=gStatus_)
+                    receipt_process_config = ReceiptProcessConfig.objects.create(
+                        sellerShipperDeliveryFee=configuration.sellerShipperDeliveryFee,
+                        sellerShipperDeliveryFeeUnit=configuration.sellerShipperDeliveryFeeUnit,
+                        handlingFee=configuration.handlingFee,
+                        handlingFeeUnit=configuration.handlingFeeUnit,
+                        weightUnit=configuration.weightUnit,
+                        shippingMode=configuration.shippingMode,
+                        customRate=configuration.customRate,
+                        customRateUnit=configuration.customRateUnit,
+                        shippingMargin=configuration.shippingMargin,
+                        shippingMarginUnit=configuration.shippingMarginUnit,
+                        defaultCurrency=configuration.defaultCurrency,
+                        transportationFee=transportation_fee
+                    )
+                    receipt_process_config.save()
+                
+                
+                    receiptName = serializer.validated_data.get('receiptName')
+                    receiptCode = serializer.validated_data.get('receiptCode')
+                    createdBy = serializer.validated_data.get('createdBy')
+                    receipt = Receipt.objects.create(
+                        receiptName=receiptName,
+                        receiptCode=receiptCode,
+                        customer=customer,
+                        receiptProcessConfig=receipt_process_config,
+                        active=True,
+                        created_by=createdBy if createdBy else (request.user.username if request.user.is_authenticated else 'Anonymous'),
+                        updated_by=createdBy if createdBy else (request.user.username if request.user.is_authenticated else 'Anonymous')
+                    )
+                    receipt.save()
+
+                    try:
+                        records_data = serializer.validated_data.get('items', [])
+                        for record_data in records_data:
+                            itemName = record_data.get('itemName')
+                            itemCost = record_data.get('itemCost')
+                            quantity = record_data.get('quantity')
+                            weight = record_data.get('weight')
+                            deliveryFee = record_data.get('deliveryFee')
+                            handlingFee = record_data.get('handlingFee')
+                            margin = record_data.get('margin')
+                            totalCost = itemCost * quantity if itemCost and quantity else None
+                            Record.objects.create(
+                                itemName=itemName,
+                                itemCost=itemCost,
+                                quantity=quantity,
+                                weight=weight,
+                                deliveryFee=deliveryFee,
+                                handlingFee=handlingFee,
+                                margin=margin,
+                                totalCost=totalCost,
+                                receipt=receipt,
+                                active=True
+                            ).save()
+
+
+                        message = "Receipt created successfully"
+                        status_ = status.HTTP_201_CREATED
+                        resp = Resp(statusDesc=message, statusCode=status_, result=ReceiptSerializerList(receipt).data)
+                        gStatus_ = status_
+                        return Response(ReceiptResponseSerializer(resp).data, status=gStatus_)
+                    except Exception as e:
+                        logger.error("Error creating records for receipt: %s", str(e))
+                        message = "Receipt creation failed"
+                        status_ = status.HTTP_400_BAD_REQUEST
+                        resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
+                        gStatus_ = status_
+                        return Response(ReceiptResponseSerializer(resp).data, status=gStatus_)
+                else:
+                    logger.warning("Process configuration with code %s not found", processCode)
+                
             except Exception as e:
                 logger.error("Error creating receipt: %s", str(e))
                 message = "Receipt creation failed"
@@ -761,3 +805,57 @@ class RecordViewSet(viewsets.ViewSet):
             resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
             gStatus_ = status_
             return Response(RecordsResponseSerializer(resp).data, status=gStatus_)
+        
+class ReceiptProcessConfigViewSet(viewsets.ViewSet):
+    def update(self, request, pk=None):
+        logger.info("Received request data for process configuration update: %s", request.data)
+        message = "Process configuration updated successfully"
+        status_ = status.HTTP_200_OK
+        serializer = ReceiptProcessConfigUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                seller_shipper_delivery_fee = serializer.validated_data.get('sellerShipperDeliveryFee')
+                seller_shipper_delivery_fee_unit = serializer.validated_data.get('sellerShipperDeliveryFeeUnit')
+                handlingFee = serializer.validated_data.get('handlingFee')
+                handlingFeeUnit = serializer.validated_data.get('handlingFeeUnit')
+                weightUnit = serializer.validated_data.get('weightUnit')
+                shippingMode = serializer.validated_data.get('shippingMode')
+                customRate = serializer.validated_data.get('customRate')
+                customRateUnit = serializer.validated_data.get('customRateUnit')
+                shippingMargin = serializer.validated_data.get('shippingMargin')
+                shippingMarginUnit = serializer.validated_data.get('shippingMarginUnit')
+                defaultCurrency = serializer.validated_data.get('defaultCurrency')
+
+                configuration = ReceiptProcessConfig.objects.filter(receiptProcessConfigId=pk).first()
+                if configuration:
+                    configuration.sellerShipperDeliveryFee = seller_shipper_delivery_fee
+                    configuration.sellerShipperDeliveryFeeUnit = seller_shipper_delivery_fee_unit
+                    configuration.handlingFee = handlingFee
+                    configuration.handlingFeeUnit = handlingFeeUnit
+                    configuration.weightUnit = weightUnit
+                    configuration.shippingMode = shippingMode
+                    configuration.customRate = customRate
+                    configuration.customRateUnit = customRateUnit
+                    configuration.shippingMargin = shippingMargin
+                    configuration.shippingMarginUnit = shippingMarginUnit
+                    configuration.defaultCurrency = defaultCurrency
+                    configuration.save()
+
+                    message = "Process configuration updated successfully"
+                    status_ = status.HTTP_200_OK
+                    resp = Resp(statusDesc=message, statusCode=status_, result=ReceiptProcessConfigSerializer(configuration).data)
+                    gStatus_ = status_
+                    return Response(ReceiptProcessConfigurationResponseSerializer(resp).data, status=gStatus_)
+                else:
+                    message = "Process configuration not found"
+                    status_ = status.HTTP_404_NOT_FOUND
+                    resp = Resp(statusDesc=message, statusCode=status_, result=None)
+                    gStatus_ = status_
+                    return Response(ReceiptProcessConfigurationResponseSerializer(resp).data, status=gStatus_)
+            except Exception as e:
+                logger.error("Error updating process configuration: %s", str(e))
+                message = "Process configuration update failed"
+                status_ = status.HTTP_400_BAD_REQUEST
+                resp = Resp(statusDesc=message, statusCode=status_, result=str(e))
+                gStatus_ = status_
+                return Response(ReceiptProcessConfigurationResponseSerializer(resp).data, status=gStatus_)

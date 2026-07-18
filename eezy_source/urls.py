@@ -9,6 +9,7 @@ router.register(r'unit', views.SystemUnitsViewSet, basename='unit')
 router.register(r'configs', views.ConfigurationViewSet, basename='config')
 router.register(r'fx', views.FXViewSet, basename='fx')
 router.register(r'receipts', views.ReceiptViewSet, basename='receipt')
+router.register(r'process-configs', views.ReceiptProcessConfigViewSet, basename='process-config')
 # router.register(r'records', views.RecordViewSet, basename='record')
 
 urlpatterns = [
