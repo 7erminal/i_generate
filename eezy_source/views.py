@@ -740,6 +740,13 @@ class RecordViewSet(viewsets.ViewSet):
         message = "Records retrieved successfully"
         status_ = status.HTTP_200_OK
         try:
+            if receipt_id is None:
+                message = "receipt_id is required"
+                status_ = status.HTTP_400_BAD_REQUEST
+                resp = Resp(statusDesc=message, statusCode=status_, result=None)
+                gStatus_ = status_
+                return Response(RecordsResponseSerializer(resp).data, status=gStatus_)
+
             records = Record.objects.filter(receipt__receiptId=receipt_id)
             logger.info("Retrieved records for receipt %s: %s", receipt_id, records)
             serializer = RecordSerializerList(records, many=True).data

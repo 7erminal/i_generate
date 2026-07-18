@@ -9,10 +9,11 @@ router.register(r'unit', views.SystemUnitsViewSet, basename='unit')
 router.register(r'configs', views.ConfigurationViewSet, basename='config')
 router.register(r'fx', views.FXViewSet, basename='fx')
 router.register(r'receipts', views.ReceiptViewSet, basename='receipt')
-router.register(r'records', views.RecordViewSet, basename='record')
+# router.register(r'records', views.RecordViewSet, basename='record')
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('api/receipts/<int:receipt_id>/records/', views.RecordViewSet.as_view({'get': 'list'}), name='receipt-records'),
     path('register/', views.UserRegistrationView.as_view(), name='register'),
     path('login/', views.UserLoginView.as_view(), name='login'),
     path('me/', views.UserProfileView.as_view(), name='me'),
