@@ -104,9 +104,9 @@ class ReceiptSerializer(serializers.Serializer):
 
 class ReceiptSerializerList(serializers.ModelSerializer):
     records = RecordSerializerList(many=True, read_only=True)
-    recordsCount = serializers.SerializerMethodField()
+    recordCount = serializers.SerializerMethodField()
 
-    def get_recordsCount(self, obj):
+    def get_recordCount(self, obj):
         # obj can be a Receipt model instance or a serialized dict depending on caller.
         if isinstance(obj, dict):
             receipt_id = obj.get('receiptId')
