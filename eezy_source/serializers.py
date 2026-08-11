@@ -122,6 +122,12 @@ class RecordSerializerList(serializers.ModelSerializer):
         fields = '__all__'
         depth = 1
 
+class RecordSerializerListAlt(serializers.ModelSerializer):
+    class Meta:
+        model = Record
+        fields = '__all__'
+
+
 class ReceiptSerializer(serializers.Serializer):
     receiptCode = serializers.CharField(max_length=100)
     receiptName = serializers.CharField(max_length=100, required=False)
@@ -231,4 +237,4 @@ class CurrenciesResponseSerializer(serializers.Serializer):
 class RecordsResponseSerializer(serializers.Serializer):
     statusCode = serializers.IntegerField()
     statusDesc = serializers.CharField()
-    result = RecordSerializerList(many=True)
+    result = RecordSerializerListAlt(many=True)
