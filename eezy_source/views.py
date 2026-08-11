@@ -795,7 +795,7 @@ class RecordViewSet(viewsets.ViewSet):
             logger.info("Retrieved records for receipt %s: %s", receipt_id, records)
             serializer = RecordSerializerList(records, many=True)
             logger.info("Serialized records: %s", serializer.data)
-            resp = Resp(statusDesc=message, statusCode=status_, result=serializer)
+            resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
             gStatus_ = status_
             return Response(RecordsResponseSerializer(resp).data, status=gStatus_)
         except Exception as e:
