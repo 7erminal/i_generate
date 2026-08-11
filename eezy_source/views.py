@@ -12,7 +12,7 @@ import logging
 from eezy_source.models import Currency, ProcessConfig, ReceiptProcessConfig, SystemUnits, FX, Receipt, Record, Business, Customer
 logger = logging.getLogger("django")
 
-from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, LoginResponseSerializer, LoginSerializer, ReceiptProcessConfigSerializer, ReceiptProcessConfigUpdateSerializer, ReceiptProcessConfigurationResponseSerializer, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, RecordSerializerListAlt, RecordsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, RegisterResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer, UserSerializer 
+from eezy_source.serializers import ConfigurationSerializer, ConfigurationSerializerGet, ConfigurationsResponseSerializer, ConfigurationResponseSerializer, CurrenciesResponseSerializer, CurrencyResponseSerializer, CurrencySerializer, CurrencySerializerList, LoginResponseSerializer, LoginSerializer, ReceiptProcessConfigSerializer, ReceiptProcessConfigUpdateSerializer, ReceiptProcessConfigurationResponseSerializer, ReceiptSerializer, RecordSerializer, ReceiptSerializerList, ReceiptResponseSerializer, ReceiptsResponseSerializer, RecordSerializerList, RecordsResponseSerializer, SystemUnitsSerializer, SystemUnitsSerializerGet, RegisterResponseSerializer, SystemUnitsResponseSerializer, FXSerializer, FXSerializerGet, FXResponseSerializer, FXsResponseSerializer, UserSerializer 
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
@@ -793,7 +793,7 @@ class RecordViewSet(viewsets.ViewSet):
 
             records = Record.objects.filter(receipt__receiptId=receipt_id)
             logger.info("Retrieved records for receipt %s: %s", receipt_id, records)
-            serializer = RecordSerializerListAlt(records, many=True)
+            serializer = RecordSerializerList(records, many=True)
             logger.info("Serialized records: %s", serializer.data)
             resp = Resp(statusDesc=message, statusCode=status_, result=serializer.data)
             gStatus_ = status_

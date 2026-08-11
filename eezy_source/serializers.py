@@ -237,4 +237,4 @@ class CurrenciesResponseSerializer(serializers.Serializer):
 class RecordsResponseSerializer(serializers.Serializer):
     statusCode = serializers.IntegerField()
     statusDesc = serializers.CharField()
-    result = RecordSerializerListAlt(many=True)
+    result = serializers.JSONField()
